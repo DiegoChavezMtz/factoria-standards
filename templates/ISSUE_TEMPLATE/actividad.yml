@@ -1,0 +1,90 @@
+name: Actividad
+description: Unit of work executable by one agent in one session. The contract between planner and executor.
+title: "[Actividad] "
+labels: ["actividad"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **This issue IS the prompt.** The executor agent receives this content
+        as its task definition. Write it so that an agent with zero prior
+        conversation context can execute it correctly.
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Context
+      description: What part of the system this touches and why this work exists. Assume the reader knows the codebase structure but NOT this conversation.
+      placeholder: |
+        The onboarding flow needs a step where new users select their role.
+        Roles live in cat_role. This is part of Épica #12 (user onboarding).
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Acceptance criteria
+      description: Verifiable conditions, one per line. "Works correctly" is not a criterion; "GET /api/roles returns only is_active=true rows from cat_role" is.
+      placeholder: |
+        - [ ] Service layer exposes getActiveRoles() reading from cat_role
+        - [ ] UI step renders one option per active role
+        - [ ] Selecting a role persists it via the service layer (no direct data access from the component)
+        - [ ] Unit tests cover the service function
+    validations:
+      required: true
+
+  - type: textarea
+    id: alcance_archivos
+    attributes:
+      label: Likely files / layers touched
+      description: Best guess — orients the executor, doesn't handcuff it. If the real work diverges a lot from this list, that's a signal to stop and flag.
+      placeholder: |
+        - src/services/roles.ts (new)
+        - src/components/onboarding/RoleStep.tsx (new)
+        - NO migrations expected (cat_role already exists)
+    validations:
+      required: true
+
+  - type: textarea
+    id: fuera_de_alcance
+    attributes:
+      label: Explicitly OUT of scope
+      description: The scope-creep vaccine. What an eager agent might be tempted to "also fix" but must NOT touch in this issue.
+      placeholder: |
+        - Do NOT modify the cat_role schema or seed data
+        - Do NOT refactor the existing onboarding steps
+        - Admin role management UI is Épica #15, not this issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: reglas_relevantes
+    attributes:
+      label: Constitution rules especially relevant here
+      description: AGENTS.md always applies in full; this highlights the rules this specific task is most at risk of violating.
+      placeholder: |
+        - Layer boundaries: component → service, never component → data layer
+        - cat_role is a catalog — reference by FK, never hardcode role strings
+    validations:
+      required: false
+
+  - type: dropdown
+    id: tamano
+    attributes:
+      label: Size check
+      description: Must fit in ONE agent session. If in doubt, it doesn't — decompose it.
+      options:
+        - "S — single file/function, < 1h"
+        - "M — a few files, one feature slice"
+        - "TOO BIG — needs decomposition (do not assign until split)"
+    validations:
+      required: true
+
+  - type: input
+    id: epica
+    attributes:
+      label: Parent Épica
+      placeholder: "#12"
+    validations:
+      required: false

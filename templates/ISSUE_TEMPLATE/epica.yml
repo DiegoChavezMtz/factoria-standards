@@ -1,0 +1,40 @@
+name: Épica
+description: A feature-level goal decomposed into Actividades. Tracks progress, is never executed directly.
+title: "[Épica] "
+labels: ["epica"]
+body:
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Goal
+      description: What exists when this Épica is done, in user/business terms.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actividades
+    attributes:
+      label: Actividades
+      description: Task list linking child issues. Check them off as they close.
+      placeholder: |
+        - [ ] #21 Role selection step
+        - [ ] #22 Profile completion step
+        - [ ] #23 Welcome email trigger
+    validations:
+      required: true
+
+  - type: textarea
+    id: decisiones
+    attributes:
+      label: Design decisions / constraints for this Épica
+      description: Decisions made at planning time that ALL child Actividades inherit. Executor agents read the parent Épica when the Actividad references one.
+    validations:
+      required: false
+
+  - type: input
+    id: hito
+    attributes:
+      label: Parent Hito
+      placeholder: "Hito 2 — Onboarding completo"
+    validations:
+      required: false

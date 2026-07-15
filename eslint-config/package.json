@@ -1,0 +1,16 @@
+{
+  "name": "@factoria/eslint-config",
+  "version": "1.0.0",
+  "description": "Layer boundary enforcement for Factoría Standards projects. Implements AGENTS.md Layer Boundaries [HARD] as ESLint rules.",
+  "main": "index.js",
+  "type": "module",
+  "exports": {
+    ".": "./index.js"
+  },
+  "peerDependencies": {
+    "eslint": ">=9.0.0",
+    "eslint-plugin-import": ">=2.30.0"
+  },
+  "keywords": ["eslint", "factoria", "architecture", "layers"],
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,40 @@
+name: Bug
+description: Something that violates expected behavior in existing functionality.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: comportamiento
+    attributes:
+      label: Expected vs actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduccion
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+
+  - type: textarea
+    id: alcance
+    attributes:
+      label: Scope of the fix
+      description: Same contract as an Actividad — fix THIS bug, and if the root cause reveals a bigger problem, flag it as a new issue instead of expanding this one.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: capa
+    attributes:
+      label: Suspected layer
+      options:
+        - UI/presentation
+        - Service layer
+        - Data access
+        - Database/schema
+        - CI/tooling
+        - Unknown
+    validations:
+      required: false

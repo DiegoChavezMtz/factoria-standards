@@ -1,0 +1,90 @@
+# ci/db-gate.yml
+# Factoría Standards — reusable database quality gate
+#
+# Spins up an ephemeral Postgres, applies the project's migrations against
+# it, and runs the three validators (RLS, FK indexes, catalog naming) from
+# this repo. Fails the calling workflow if any hard gate fails.
+#
+# Consumed by project repos as:
+#   jobs:
+#     db-gate:
+#       uses: <org>/factoria-standards/.github/workflows/db-gate.yml@v1
+#       with:
+#         migrations_path: "./supabase/migrations"
+#         postgres_version: "16"
+
+name: DB Gate (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      migrations_path:
+        description: "Path to the project's SQL migration files, applied in filename order"
+        required: true
+        type: string
+      postgres_version:
+        description: "Postgres major version to test against"
+        required: false
+        type: string
+        default: "16"
+      schema_name:
+        description: "Schema to validate (passed through to validators)"
+        required: false
+        type: string
+        default: "public"
+
+jobs:
+  db-gate:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:${{ inputs.postgres_version }}
+        env:
+          POSTGRES_USER: factoria
+          POSTGRES_PASSWORD: factoria
+          POSTGRES_DB: factoria_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://factoria:factoria@localhost:5432/factoria_test
+
+    steps:
+      - name: Checkout calling project
+        uses: actions/checkout@v4
+
+      - name: Checkout factoria-standards (for validators)
+        uses: actions/checkout@v4
+        with:
+          repository: <org>/factoria-standards
+          ref: v1
+          path: .factoria-standards
+
+      - name: Wait for Postgres
+        run: |
+          for i in $(seq 1 20); do
+            pg_isready -h localhost -p 5432 -U factoria && break
+            sleep 2
+          done
+
+      - name: Apply migrations
+        run: |
+          for f in $(ls "${{ inputs.migrations_path }}"/*.sql | sort); do
+            echo "Applying $f"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: RLS gate
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f .factoria-standards/validators/check-rls.sql
+
+      - name: FK index gate
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f .factoria-standards/validators/check-fk-indexes.sql
+
+      - name: Naming/catalog gate
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f .factoria-standards/validators/check-naming.sql

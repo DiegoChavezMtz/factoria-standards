@@ -1,0 +1,30 @@
+# CODEOWNERS — Factoría Standards template
+# Purpose: enforce the Human Gates defined in AGENTS.md automatically.
+# Replace @TECH-LEAD with the actual GitHub handle(s) on project setup.
+#
+# How it works: any PR touching these paths REQUIRES review from the
+# listed owner before merge (with branch protection's "require review
+# from Code Owners" enabled). This is Human Gate enforcement, not
+# bureaucracy — everything NOT listed here flows with normal review.
+
+# Schema changes — the irreversible layer
+/migrations/                    @TECH-LEAD
+/supabase/migrations/           @TECH-LEAD
+
+# Authentication & authorization logic
+/src/services/auth/             @TECH-LEAD
+
+# RLS policies (if kept separate from migrations)
+/policies/                      @TECH-LEAD
+
+# The constitution itself and agent configuration
+/AGENTS.md                      @TECH-LEAD
+/CLAUDE.md                      @TECH-LEAD
+/.gemini/                       @TECH-LEAD
+
+# CI workflows — changing the law's enforcement requires the same review
+# as changing the law
+/.github/workflows/             @TECH-LEAD
+
+# Dependency manifests — new dependencies are a Human Gate
+package.json                    @TECH-LEAD

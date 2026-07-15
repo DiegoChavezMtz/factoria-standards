@@ -1,0 +1,87 @@
+# ci/quality-gate.yml
+# Factoría Standards — reusable code quality gate
+#
+# Runs lint, typecheck, and tests using commands the CALLING project
+# declares. This workflow does not assume a language or package manager —
+# it assumes a `setup_command` prepares the environment and the three
+# check commands are runnable after that.
+#
+# Consumed by project repos as:
+#   jobs:
+#     quality-gate:
+#       uses: <org>/factoria-standards/.github/workflows/quality-gate.yml@v1
+#       with:
+#         setup_command: "npm ci"
+#         lint_command: "npm run lint"
+#         typecheck_command: "npm run typecheck"
+#         test_command: "npm test -- --ci"
+#         node_version: "20"
+
+name: Quality Gate (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      setup_command:
+        description: "Command to install dependencies"
+        required: true
+        type: string
+      lint_command:
+        description: "Command to run linting"
+        required: true
+        type: string
+      typecheck_command:
+        description: "Command to run type checking (pass 'true' as a no-op if N/A)"
+        required: true
+        type: string
+      test_command:
+        description: "Command to run the test suite"
+        required: true
+        type: string
+      node_version:
+        description: "Node version, if the project is Node-based"
+        required: false
+        type: string
+        default: "20"
+      working_directory:
+        description: "Directory to run commands from"
+        required: false
+        type: string
+        default: "."
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: ${{ inputs.setup_command }}
+
+      - name: Lint
+        run: ${{ inputs.lint_command }}
+
+      - name: Typecheck
+        run: ${{ inputs.typecheck_command }}
+
+      - name: Test
+        run: ${{ inputs.test_command }}
+
+      - name: No skipped or disabled tests
+        run: |
+          if grep -rE "\.(skip|todo)\(|xit\(|xdescribe\(" --include="*.test.*" --include="*.spec.*" .; then
+            echo "::error::Found skipped/disabled tests. AGENTS.md prohibits marking work complete with weakened tests."
+            exit 1
+          fi
+          echo "No skipped tests found."
